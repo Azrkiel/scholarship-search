@@ -1,0 +1,18 @@
+# This repo is PUBLIC. Everything below holds personal data and must stay local.
+
+# Filled-in applicant profile (PII)
+profile.md
+
+# Live tracker working copies
+scholarships.csv
+scholarships.md
+
+# Draft essays, materials, and pre-filled applications
+applications/*
+!applications/README.md
+
+# Editor / OS noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
