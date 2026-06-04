@@ -16,3 +16,12 @@ applications/*
 Thumbs.db
 .vscode/
 .idea/
+
+# Derived views (regenerated from the tracker) + automation logs
+deadlines.ics
+scholarships.html
+logs/
+
+# Python
+__pycache__/
+*.pyc

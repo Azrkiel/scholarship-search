@@ -64,8 +64,39 @@ Re-run `/sweep` regularly — new scholarships post constantly and deadlines rol
 |---------|--------------|
 | `/intake` | Create or update your applicant profile |
 | `/sweep [optional focus]` | Run a verified scholarship search and update the tracker |
+| `/sync` | Rebuild `deadlines.ics` and `scholarships.html` from the tracker |
 
 You can also just talk to Claude in plain language — the commands are shortcuts into the workflow defined in `CLAUDE.md`.
+
+---
+
+## Deadlines & dashboard
+
+`scholarships.csv` is the single source of truth. Two small stdlib-only Python scripts render it into views you'll actually use — no API keys, no paid services, no tokens spent:
+
+- **Calendar reminders** — `python tools/build_ics.py` writes `deadlines.ics`, a standard iCalendar file with an alarm 7 days and 1 day before each deadline. Import it into Google Calendar, Apple Calendar, or Outlook. UIDs are stable, so re-importing after a sweep updates events in place instead of duplicating them. (Note: Google Calendar applies its own account-default notifications on import rather than the file's alarms — set a default reminder on the imported calendar if you want the 7d/1d timing there.)
+- **Browser dashboard** — `python tools/build_dashboard.py` writes `scholarships.html`, an urgency-sorted, color-coded table (closing-soon, overdue, rolling, closed). Open it in any browser.
+
+After any change to the tracker, run both — or just use `/sync`. Don't hand-edit the generated `.ics` / `.html`; they're regenerated from the CSV (and are gitignored).
+
+---
+
+## Automate weekly sweeps
+
+You can have Claude run `/sweep` unattended on a schedule and rebuild the views afterward. The wrappers in `tools/` (`run-sweep.ps1` for Windows, `run-sweep.sh` for macOS/Linux) run a headless `claude -p "/sweep"`, then regenerate `deadlines.ics` and `scholarships.html` from whatever the sweep logged. They require a complete `profile.md` and never auto-apply — search and log only.
+
+Register the schedule once (the CLI must be authenticated and on `PATH` in the scheduler's context — use the full path to `claude` if not):
+
+- **Windows (Task Scheduler):**
+  ```
+  schtasks /create /tn "ScholarshipSweep" /tr "powershell -ExecutionPolicy Bypass -File C:\Users\Kevin\scholarship-search\tools\run-sweep.ps1" /sc weekly /d SUN /st 08:00
+  ```
+- **macOS / Linux (cron):**
+  ```
+  0 8 * * 0 /path/to/scholarship-search/tools/run-sweep.sh
+  ```
+
+Logs land in `logs/` (gitignored). An unattended sweep spends credits, so the wrappers pin `--model sonnet`.
 
 ---
 
@@ -76,8 +107,11 @@ CLAUDE.md                  # agent behavior spec (auto-loaded by Claude Code)
 profile.template.md        # blank intake form  → copy to profile.md
 scholarships.template.csv  # tracker header     → copy to scholarships.csv
 scholarships.template.md   # readable tracker   → copy to scholarships.md
+tools/                     # stdlib renderers + sweep wrappers (build_ics, build_dashboard, run-sweep)
+deadlines.ics              # generated calendar reminders (gitignored)
+scholarships.html          # generated dashboard (gitignored)
 applications/              # per-award draft folders (gitignored)
-.claude/commands/          # /intake and /sweep slash commands
+.claude/commands/          # /intake, /sweep, and /sync slash commands
 .gitignore                 # keeps your personal data out of git
 ```
 

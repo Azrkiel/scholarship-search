@@ -32,9 +32,12 @@ This repository **is public**. Treat the split below as a hard rule.
 | `README.md` | yes | Human-facing usage guide |
 | `profile.template.md` | yes | Blank intake form |
 | `scholarships.template.csv` / `.md` | yes | Empty tracker templates |
+| `tools/` + `tests/` | yes | Stdlib renderers (`.ics` / `.html`), sweep wrappers, and their tests |
 | `profile.md` | **NO — gitignored** | The user's real, filled-in profile (PII) |
 | `scholarships.csv` / `scholarships.md` | **NO — gitignored** | The live pipeline (working copies) |
 | `applications/<award>/…` | **NO — gitignored** | Draft essays, materials, pre-fills |
+| `deadlines.ics` / `scholarships.html` | **NO — gitignored** | Derived views regenerated from the CSV |
+| `logs/` | **NO — gitignored** | Scheduled-sweep run logs |
 
 On first run, copy `profile.template.md` → `profile.md` and the tracker templates → their working filenames, then work in the copies. The `.gitignore` already excludes the working files. **Never commit, paste, or transmit the user's personal data** — name, address, financials, identity factors, SSN, logins. It stays in the gitignored working files on the local machine only.
 
@@ -152,10 +155,27 @@ Maintain `scholarships.csv` (machine-readable) and `scholarships.md` (human-read
 Name | Sponsor | Award $ | Deadline | Eligibility match notes | Requirements (essay/recs/transcript) | Source URL | Est. odds | Status
 ```
 
+Deadline format: ISO **YYYY-MM-DD**. Use `Rolling` / `Unknown` when there's no fixed date (these are excluded from calendar reminders).
+
 Status pipeline:
 `FOUND → VETTED → MATERIALS NEEDED → DRAFTING → READY FOR REVIEW → SUBMITTED → RESULT`
 
 Keep it current. Never silently drop a scholarship — if one expires or you discover the user isn't eligible, mark it `CLOSED` / `INELIGIBLE` with a reason rather than deleting it. In CSV, quote any field that contains a comma.
+
+### Derived views (free, generated from the CSV)
+
+`scholarships.csv` is the single source of truth. Two stdlib scripts render it — never
+hand-edit their output:
+
+- `python tools/build_ics.py` → `deadlines.ics`: import into Google/Apple/Outlook for
+  deadline reminders (alarms fire 7 days and 1 day before). Re-import after each sweep;
+  UIDs are stable so events update in place rather than duplicating.
+- `python tools/build_dashboard.py` → `scholarships.html`: an urgency-sorted dashboard
+  (closing-soon, overdue, rolling, closed color-coded). Open in a browser.
+
+Run both after any tracker change (or use `/sync`). They take no tokens and need no API.
+Scheduled sweeps (`tools/run-sweep.ps1` / `.sh` via Task Scheduler or cron) run `/sweep`
+then rebuild these — search + log only; never auto-apply.
 
 ---
 

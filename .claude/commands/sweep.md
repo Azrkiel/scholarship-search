@@ -31,5 +31,7 @@ Steps:
 5. **Prioritize** by effort-to-odds (amount, narrowness of fit, application burden,
    deadline urgency).
 6. **Report**: how many found, the top picks, and any deadlines closing soon.
+7. **Rebuild views.** After updating the tracker, run `python tools/build_ics.py` and
+   `python tools/build_dashboard.py` so `deadlines.ics` and `scholarships.html` stay current.
 
 Do not invent scholarships. Cite the source URL for each one.
