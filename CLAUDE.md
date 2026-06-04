@@ -111,12 +111,24 @@ site:[user's college].edu scholarships [department]
 
 Iterate: each result often names a sponsor or category that seeds the next query. Keep going until queries stop surfacing new, eligible, open awards.
 
+### Fetching efficiently — cost & token discipline
+
+Fetching is the expensive part. **Free tools only — no paid scraping APIs (Firecrawl etc.).** Minimize both the number of fetches and the tokens per fetch:
+
+1. **Triage from search snippets first; fetch only finalists.** WebSearch gives titles, URLs, and snippets for free. Shortlist the plausibly-eligible, open awards from snippets, *then* WebFetch to confirm. Never fetch a page just to check if it's relevant.
+2. **Dedupe before fetching, not after.** The same award appears on many aggregators — collapse by sponsor + award name first, then fetch the single best source once.
+3. **Prefer the sponsor's own page over aggregators.** A college `.edu` or foundation `.org` page is leaner, authoritative, and rarely bot-blocked. Aggregator pages (Bold.org, Niche, Fastweb) are bloated and often stale — go to the source.
+4. **Give WebFetch a tight extraction prompt.** WebFetch returns a model-processed answer to *your* prompt, not the raw page — so ask narrowly: *"Return only the deadline, award amount, eligibility criteria, sponsor, and required materials; if a field isn't on the page, say 'not found'."* Small payload, low tokens.
+5. **Free fallback for JS-heavy / bot-walled pages: Jina Reader.** When WebFetch returns an empty shell or a bot wall, retry by prefixing the URL with `https://r.jina.ai/` (e.g. WebFetch `https://r.jina.ai/https://example.org/scholarship`) — it returns clean, rendered markdown stripped of nav/ads, on a keyless free tier (rate-limited; a free API key raises limits). Only the public scholarship URL is sent — never user data. If that also fails, skip the award (almost always a low-odds aggregator) rather than burning tokens.
+
+Net rule: **search wide, fetch narrow.** One clean fetch of the real source with a tight prompt beats ten bloated aggregator pulls.
+
 ---
 
 ## Operating Workflow
 
 1. **Intake** — confirm `profile.md` is complete.
-2. **Search** — sweep the sources above with targeted intersectional queries.
+2. **Search & triage** — sweep with targeted intersectional queries; shortlist from snippets and fetch only finalists (see *Fetching efficiently*).
 3. **Verify each candidate** before logging. It only gets logged if it passes ALL of:
    - Working source URL that you actually fetched (not just a search snippet)
    - Deadline is in the future relative to today's date (reject expired ones)
