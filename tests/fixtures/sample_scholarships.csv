@@ -1,0 +1,6 @@
+Name,Sponsor,Award $,Deadline,Eligibility match notes,Requirements,Source URL,Est. odds,Status
+Example STEM Award,Example Foundation,5000,2026-07-01,Test row; CS major,Essay; transcript,https://example.org/stem,High,VETTED
+Example Local Grant,Example Community Fund,1000,2026-06-10,"Test row, local, low competition",Essay,https://example.org/local,High,FOUND
+Example Rolling Fund,Example Org,2000,Rolling,Test row no fixed date,None,https://example.org/rolling,Medium,FOUND
+Example Past Award,Example Old Sponsor,3000,2026-05-01,Test row already expired,Essay,https://example.org/past,Low,FOUND
+Example Closed Award,Example Sponsor,4000,2026-08-01,Test row,Essay,https://example.org/closed,Low,CLOSED
